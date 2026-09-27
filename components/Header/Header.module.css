@@ -1,0 +1,191 @@
+.header {
+    width: 100%;
+    background-color: var(--white);
+}
+
+.container {
+    width: 100%;
+    min-height: 64px;
+    margin: 0 auto;
+    padding: 0 16px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logoText {
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: #121417;
+}
+
+.logo:hover,
+.logo:focus {
+    opacity: 0.8;
+}
+
+.flag {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 50%;
+}
+
+.flagBlue,
+.flagYellow {
+    width: 100%;
+    height: 50%;
+}
+
+.flagBlue {
+    background-color: #338af3;
+}
+
+.flagYellow {
+    background-color: #ffda44;
+}
+
+.navigation {
+    display: none;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-self: end;
+}
+
+.loginButton,
+.registerButton {
+    border: none;
+    font-family: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.loginButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    border: none;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.25;
+    color: #121417;
+    background-color: transparent;
+    cursor: pointer;
+    transition: color 250ms ease;
+}
+
+.loginIcon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: #f4c550;
+}
+
+.loginButton:hover,
+.loginButton:focus {
+    color: #f4c550;
+}
+
+.registerButton {
+    padding: 10px 14px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 1.25;
+    color: #ffffff;
+    background-color: #121417;
+    cursor: pointer;
+    transition: background-color 250ms ease;
+}
+
+.registerButton:hover,
+.registerButton:focus {
+    background-color: #333333;
+}
+
+@media screen and (min-width: 375px) {
+    .container {
+        padding: 0 20px;
+    }
+
+    .logo {
+        font-size: 20px;
+    }
+
+    .actions {
+        gap: 12px;
+    }
+}
+
+@media screen and (min-width: 768px) {
+    .container {
+        min-height: 80px;
+        padding: 0 32px;
+    }
+
+    .navigation {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 28px;
+        justify-self: center;
+    }
+
+    .link {
+        font-weight: 400;
+        font-size: 16px;
+        line-height: 1.25;
+        color: #121417;
+        transition: color 250ms ease;
+    }
+
+    .link:hover,
+    .link:focus {
+        color: var(--yellow);
+    }
+
+    .loginButton {
+        font-size: 16px;
+    }
+
+    .registerButton {
+        font-size: 16px;
+    }
+}
+
+@media screen and (min-width: 1440px) {
+    .container {
+        position: relative;
+        max-width: 1184px;
+        min-height: 96px;
+        padding: 0;
+    }
+
+    .navigation {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .registerButton {
+        width: 166px;
+        height: 48px;
+        padding: 14px 39px;
+    }
+}

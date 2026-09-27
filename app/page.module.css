@@ -1,0 +1,357 @@
+.hero {
+    padding-bottom: 24px;
+    background-color: #ffffff;
+}
+
+.container {
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ==============================
+   HERO TOP
+   ============================== */
+
+.heroTop {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ==============================
+   LEFT BLOCK
+   ============================== */
+
+.content {
+    width: 100%;
+    padding: 48px 20px 32px;
+    display: flex;
+    flex-direction: column;
+    background-color: #f8f8f8;
+    border-radius: 20px;
+}
+
+.title {
+    margin-bottom: 24px;
+    font-weight: 500;
+    font-size: 32px;
+    line-height: 1.17;
+    letter-spacing: -0.02em;
+    color: #121417;
+}
+
+.highlight {
+    display: inline-block;
+    padding: 0 4px;
+    font-weight: 400;
+    font-style: italic;
+    background-color: #fbe9ba;
+    border-radius: 8px;
+}
+
+.description {
+    margin-bottom: 40px;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.38;
+    letter-spacing: -0.02em;
+    color: #121417;
+}
+
+.startButton {
+    width: 100%;
+    min-height: 54px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.5;
+    white-space: nowrap;
+    color: #121417;
+    background-color: #f4c550;
+    cursor: pointer;
+    transition: background-color 250ms ease;
+}
+
+.startButton:hover,
+.startButton:focus {
+    background-color: #ffdc86;
+}
+
+/* ==============================
+   IMAGE BLOCK
+   ============================== */
+
+.imageWrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 568 / 530;
+    overflow: hidden;
+    background-color: #fbe9ba;
+    border-radius: 20px;
+}
+
+.girl {
+    position: absolute;
+    width: 59.68%;
+    height: auto;
+    top: 15.09%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+}
+
+.mac {
+    position: absolute;
+    width: 63.38%;
+    height: auto;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    z-index: 2;
+}
+
+/* ==============================
+   STATISTICS
+   ============================== */
+
+.stats {
+    width: 100%;
+    padding: 24px;
+    border: 1.5px dashed #f4c550;
+    border-radius: 20px;
+}
+
+.statsList {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.statItem {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.statValue {
+    flex-shrink: 0;
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 1.14;
+    letter-spacing: -0.02em;
+    color: #121417;
+    white-space: nowrap;
+}
+
+.statText {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.29;
+    letter-spacing: -0.02em;
+    color: rgba(18, 20, 23, 0.7);
+}
+
+/* ==============================
+   MOBILE >= 375px
+   ============================== */
+
+@media screen and (min-width: 375px) {
+    .container {
+        padding: 0 20px;
+    }
+
+    .title {
+        font-size: 36px;
+    }
+}
+
+/* ==============================
+   TABLET >= 768px
+   ============================== */
+
+@media screen and (min-width: 768px) {
+    .hero {
+        padding-bottom: 32px;
+    }
+
+    .container {
+        padding: 0 32px;
+        gap: 24px;
+    }
+
+    .heroTop {
+        gap: 24px;
+    }
+
+    .content {
+        padding: 64px 48px 48px;
+        border-radius: 30px;
+    }
+
+    .title {
+        max-width: 548px;
+        margin-bottom: 32px;
+        font-size: 44px;
+    }
+
+    .description {
+        max-width: 471px;
+    }
+
+    .startButton {
+        width: 267px;
+        min-height: 60px;
+        font-size: 18px;
+    }
+
+    .imageWrapper {
+        border-radius: 30px;
+    }
+
+    .stats {
+        padding: 32px;
+        border-radius: 30px;
+    }
+
+    .statsList {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 32px;
+    }
+
+    .statValue {
+        font-size: 28px;
+    }
+}
+
+/* ==============================
+   DESKTOP >= 1440px
+   ============================== */
+
+@media screen and (min-width: 1440px) {
+    .container {
+        width: 1312px;
+        max-width: 1312px;
+        padding: 0;
+        gap: 24px;
+    }
+
+    .heroTop {
+        display: grid;
+        grid-template-columns: 720px 568px;
+        gap: 24px;
+    }
+
+    /* LEFT BLOCK */
+
+    .content {
+        width: 720px;
+        height: 530px;
+        padding: 98px 64px 64px;
+        border-radius: 30px;
+    }
+
+    .title {
+        width: 548px;
+        max-width: 548px;
+        margin-bottom: 32px;
+        font-weight: 500;
+        font-size: 48px;
+        line-height: 1.17;
+        letter-spacing: -0.02em;
+    }
+
+    .description {
+        width: 471px;
+        max-width: 471px;
+        margin-bottom: 40px;
+    }
+
+    .startButton {
+        width: 267px;
+        height: 60px;
+        min-height: 60px;
+        padding: 16px 88px;
+        border-radius: 12px;
+    }
+
+    /* RIGHT BLOCK */
+
+    .imageWrapper {
+        width: 568px;
+        height: 530px;
+        aspect-ratio: auto;
+        border-radius: 30px;
+    }
+
+    .girl {
+        width: 339px;
+        height: 339px;
+        top: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .mac {
+        width: 360px;
+        height: 176px;
+        left: 50%;
+        bottom: 0;
+        transform: translateX(-50%);
+    }
+
+    /* ==============================
+     STATS DESKTOP
+     ============================== */
+
+    .stats {
+        width: 1312px;
+        height: 116px;
+        padding: 36px 122px 44px 123px;
+        border: 1.5px dashed #f4c550;
+        border-radius: 30px;
+    }
+
+    .statsList {
+        width: max-content;
+        height: 36px;
+        display: grid;
+        grid-template-columns:
+            217px 232px 159px 159px;
+
+        column-gap: 100px;
+        align-items: center;
+    }
+
+    .statItem {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .statValue {
+        flex-shrink: 0;
+        font-weight: 500;
+        font-size: 28px;
+        line-height: 1.14;
+        letter-spacing: -0.02em;
+        color: #121417;
+        white-space: nowrap;
+    }
+
+    .statText {
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 1.29;
+        letter-spacing: -0.02em;
+        color: rgba(18, 20, 23, 0.7);
+    }
+}
