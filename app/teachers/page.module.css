@@ -1,0 +1,36 @@
+.section {
+    min-height: 100vh;
+
+    padding: 32px 16px 48px;
+
+    background-color: #f8f8f8;
+}
+
+.container {
+    width: 100%;
+
+    margin: 0 auto;
+}
+
+@media screen and (min-width: 375px) {
+    .section {
+        padding-inline: 20px;
+    }
+}
+
+@media screen and (min-width: 768px) {
+    .section {
+        padding: 48px 32px 64px;
+    }
+}
+
+@media screen and (min-width: 1440px) {
+    .section {
+        padding: 96px 0 96px;
+    }
+
+    .container {
+        width: 1184px;
+        max-width: 1184px;
+    }
+}
