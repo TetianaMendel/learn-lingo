@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+
 import TeacherCard from "@/components/TeacherCard/TeacherCard";
 import TeachersFilters from "@/components/TeachersFilters/TeachersFilters";
-import { getTeachers } from "@/lib/teachers";
+import { getTeachersPage } from "@/lib/teachers";
 import type { Teacher } from "@/types/teacher";
-import css from "./TeachersList.module.css";
 
-const ITEMS_PER_PAGE = 4;
+import css from "./TeachersList.module.css";
 
 const TeachersList = () => {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
@@ -16,10 +16,14 @@ const TeachersList = () => {
   const [level, setLevel] = useState("");
   const [price, setPrice] = useState("");
 
-  const [visibleCount, setVisibleCount] =
-    useState(ITEMS_PER_PAGE);
+  const [lastKey, setLastKey] = useState<string | null>(
+    null,
+  );
+
+  const [hasMore, setHasMore] = useState(true);
 
   const [isLoading, setIsLoading] = useState(true);
+
   const [isLoadingMore, setIsLoadingMore] =
     useState(false);
 
@@ -28,14 +32,23 @@ const TeachersList = () => {
   );
 
   useEffect(() => {
-    const loadTeachers = async () => {
+    const loadInitialTeachers = async () => {
       try {
         setIsLoading(true);
         setError(null);
-        const data = await getTeachers();
-        setTeachers(data);
+
+        const {
+          teachers: firstTeachers,
+          lastKey: newLastKey,
+          hasMore: moreAvailable,
+        } = await getTeachersPage();
+
+        setTeachers(firstTeachers);
+        setLastKey(newLastKey);
+        setHasMore(moreAvailable);
       } catch (error) {
         console.error(error);
+
         setError(
           "Unable to load teachers. Please try again.",
         );
@@ -44,7 +57,7 @@ const TeachersList = () => {
       }
     };
 
-    void loadTeachers();
+    void loadInitialTeachers();
   }, []);
 
   const filteredTeachers = useMemo(() => {
@@ -68,41 +81,54 @@ const TeachersList = () => {
     });
   }, [teachers, language, level, price]);
 
-  const visibleTeachers = filteredTeachers.slice(
-    0,
-    visibleCount,
-  );
-
-  const hasMore =
-    visibleCount < filteredTeachers.length;
-
   const handleLanguageChange = (value: string) => {
     setLanguage(value);
-    setVisibleCount(ITEMS_PER_PAGE);
   };
 
   const handleLevelChange = (value: string) => {
     setLevel(value);
-    setVisibleCount(ITEMS_PER_PAGE);
   };
 
   const handlePriceChange = (value: string) => {
     setPrice(value);
-    setVisibleCount(ITEMS_PER_PAGE);
   };
 
   const handleLoadMore = async () => {
+    if (!lastKey || !hasMore || isLoadingMore) {
+      return;
+    }
+
     try {
       setIsLoadingMore(true);
       setError(null);
 
-      const freshTeachers = await getTeachers();
+      const {
+        teachers: nextTeachers,
+        lastKey: newLastKey,
+        hasMore: moreAvailable,
+      } = await getTeachersPage(lastKey);
 
-      setTeachers(freshTeachers);
+      setTeachers((currentTeachers) => {
+        const existingIds = new Set(
+          currentTeachers.map(
+            (teacher) => teacher.id,
+          ),
+        );
 
-      setVisibleCount(
-        (current) => current + ITEMS_PER_PAGE,
-      );
+        const uniqueNewTeachers =
+          nextTeachers.filter(
+            (teacher) =>
+              !existingIds.has(teacher.id),
+          );
+
+        return [
+          ...currentTeachers,
+          ...uniqueNewTeachers,
+        ];
+      });
+
+      setLastKey(newLastKey);
+      setHasMore(moreAvailable);
     } catch (error) {
       console.error(error);
 
@@ -141,10 +167,10 @@ const TeachersList = () => {
         onPriceChange={handlePriceChange}
       />
 
-      {visibleTeachers.length > 0 ? (
+      {filteredTeachers.length > 0 ? (
         <>
           <div className={css.list}>
-            {visibleTeachers.map((teacher) => (
+            {filteredTeachers.map((teacher) => (
               <TeacherCard
                 key={teacher.id}
                 teacher={teacher}
@@ -172,9 +198,25 @@ const TeachersList = () => {
           )}
         </>
       ) : (
-        <p className={css.empty}>
-          No teachers found for the selected filters.
-        </p>
+        <>
+          <p className={css.empty}>
+            No teachers found for the selected
+            filters.
+          </p>
+
+          {hasMore && (
+            <button
+              type="button"
+              className={css.loadMore}
+              onClick={handleLoadMore}
+              disabled={isLoadingMore}
+            >
+              {isLoadingMore
+                ? "Loading..."
+                : "Load more"}
+            </button>
+          )}
+        </>
       )}
     </>
   );
