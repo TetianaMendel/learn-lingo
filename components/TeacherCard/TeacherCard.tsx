@@ -2,20 +2,90 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { FaStar } from "react-icons/fa";
 import { FiBookOpen, FiHeart } from "react-icons/fi";
+
+import {
+  addFavoriteTeacher,
+  isFavoriteTeacher,
+  removeFavoriteTeacher,
+} from "@/lib/favorites";
+import { useAuthStore } from "@/lib/store/authStore";
 import type { Teacher } from "@/types/teacher";
+
 import css from "./TeacherCard.module.css";
 
 type TeacherCardProps = {
   teacher: Teacher;
+  onFavoriteChange?: (
+    teacherId: string,
+    isFavorite: boolean,
+  ) => void;
 };
 
-const TeacherCard = ({ teacher }: TeacherCardProps) => {
+const TeacherCard = ({
+  teacher,
+  onFavoriteChange,
+}: TeacherCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
+
+  const isAuthenticated = useAuthStore(
+    (state) => state.isAuthenticated,
+  );
+
+  const user = useAuthStore((state) => state.user);
+
+  const [isFavorite, setIsFavorite] = useState(() => {
+    if (!user) {
+      return false;
+    }
+
+    return isFavoriteTeacher(
+      user.uid,
+      teacher.id,
+    );
+  });
 
   const fullName = `${teacher.name} ${teacher.surname}`;
+
+  const handleFavoriteClick = () => {
+    if (!isAuthenticated || !user) {
+      toast.error(
+        "This functionality is available only for authorized users.",
+      );
+
+      return;
+    }
+
+    if (isFavorite) {
+      removeFavoriteTeacher(
+        user.uid,
+        teacher.id,
+      );
+
+      setIsFavorite(false);
+
+      onFavoriteChange?.(
+        teacher.id,
+        false,
+      );
+
+      return;
+    }
+
+    addFavoriteTeacher(
+      user.uid,
+      teacher.id,
+    );
+
+    setIsFavorite(true);
+
+    onFavoriteChange?.(
+      teacher.id,
+      true,
+    );
+  };
 
   return (
     <article className={css.card}>
@@ -28,18 +98,26 @@ const TeacherCard = ({ teacher }: TeacherCardProps) => {
             height={96}
             className={css.avatar}
           />
+
           <span
             className={css.onlineDot}
             aria-label="Teacher is online"
           />
         </div>
       </div>
+
       <div className={css.content}>
         <div className={css.header}>
           <div className={css.nameBlock}>
-            <span className={css.caption}>Languages</span>
-            <h2 className={css.name}>{fullName}</h2>
+            <span className={css.caption}>
+              Languages
+            </span>
+
+            <h2 className={css.name}>
+              {fullName}
+            </h2>
           </div>
+
           <div className={css.rightBlock}>
             <div className={css.meta}>
               <div className={css.metaItem}>
@@ -47,23 +125,43 @@ const TeacherCard = ({ teacher }: TeacherCardProps) => {
                   className={css.bookIcon}
                   aria-hidden="true"
                 />
+
                 <span>Lessons online</span>
               </div>
-              <span className={css.divider} aria-hidden="true" />
+
+              <span
+                className={css.divider}
+                aria-hidden="true"
+              />
+
               <div className={css.metaItem}>
                 <span>
-                  Lessons done: {teacher.lessons_done}
+                  Lessons done:{" "}
+                  {teacher.lessons_done}
                 </span>
               </div>
-              <span className={css.divider} aria-hidden="true" />
+
+              <span
+                className={css.divider}
+                aria-hidden="true"
+              />
+
               <div className={css.metaItem}>
                 <FaStar
                   className={css.starIcon}
                   aria-hidden="true"
                 />
-                <span>Rating: {teacher.rating}</span>
+
+                <span>
+                  Rating: {teacher.rating}
+                </span>
               </div>
-              <span className={css.divider} aria-hidden="true" />
+
+              <span
+                className={css.divider}
+                aria-hidden="true"
+              />
+
               <div className={css.metaItem}>
                 <span>
                   Price / 1 hour:{" "}
@@ -77,9 +175,11 @@ const TeacherCard = ({ teacher }: TeacherCardProps) => {
             <button
               type="button"
               className={`${css.favoriteButton} ${
-                isFavorite ? css.favoriteButtonActive : ""
+                isFavorite
+                  ? css.favoriteButtonActive
+                  : ""
               }`}
-              onClick={() => setIsFavorite((prev) => !prev)}
+              onClick={handleFavoriteClick}
               aria-label={
                 isFavorite
                   ? `Remove ${fullName} from favorites`
@@ -97,7 +197,10 @@ const TeacherCard = ({ teacher }: TeacherCardProps) => {
 
         <div className={css.details}>
           <p className={css.detail}>
-            <span className={css.detailLabel}>Speaks: </span>
+            <span className={css.detailLabel}>
+              Speaks:{" "}
+            </span>
+
             <span className={css.languages}>
               {teacher.languages.join(", ")}
             </span>
@@ -107,12 +210,17 @@ const TeacherCard = ({ teacher }: TeacherCardProps) => {
             <span className={css.detailLabel}>
               Lesson Info:{" "}
             </span>
-            <span>{teacher.lesson_info}</span>
+
+            <span>
+              {teacher.lesson_info}
+            </span>
           </p>
+
           <p className={css.detail}>
             <span className={css.detailLabel}>
               Conditions:{" "}
             </span>
+
             <span>
               {Array.isArray(teacher.conditions)
                 ? teacher.conditions.join(" ")
@@ -125,7 +233,9 @@ const TeacherCard = ({ teacher }: TeacherCardProps) => {
           <button
             type="button"
             className={css.readMore}
-            onClick={() => setIsExpanded(true)}
+            onClick={() =>
+              setIsExpanded(true)
+            }
             aria-expanded={false}
           >
             Read more
@@ -140,46 +250,68 @@ const TeacherCard = ({ teacher }: TeacherCardProps) => {
 
             {teacher.reviews.length > 0 && (
               <ul className={css.reviews}>
-                {teacher.reviews.map((review, index) => (
-                  <li
-                    key={`${teacher.id}-${index}`}
-                    className={css.reviewItem}
-                  >
-                    <div className={css.reviewHeader}>
+                {teacher.reviews.map(
+                  (review, index) => (
+                    <li
+                      key={`${teacher.id}-${index}`}
+                      className={css.reviewItem}
+                    >
                       <div
-                        className={css.reviewAvatar}
-                        aria-hidden="true"
+                        className={css.reviewHeader}
                       >
-                        {review.reviewer_name
-                          .charAt(0)
-                          .toUpperCase()}
-                      </div>
+                        <div
+                          className={css.reviewAvatar}
+                          aria-hidden="true"
+                        >
+                          {review.reviewer_name
+                            .charAt(0)
+                            .toUpperCase()}
+                        </div>
 
-                      <div className={css.reviewAuthorInfo}>
-                        <span className={css.reviewAuthorName}>
-                          {review.reviewer_name}
-                        </span>
-
-                        <div className={css.reviewRating}>
-                          <FaStar
-                            className={css.reviewStar}
-                            aria-hidden="true"
-                          />
-
+                        <div
+                          className={
+                            css.reviewAuthorInfo
+                          }
+                        >
                           <span
-                            className={css.reviewRatingValue}
+                            className={
+                              css.reviewAuthorName
+                            }
                           >
-                            {review.reviewer_rating.toFixed(1)}
+                            {review.reviewer_name}
                           </span>
+
+                          <div
+                            className={
+                              css.reviewRating
+                            }
+                          >
+                            <FaStar
+                              className={
+                                css.reviewStar
+                              }
+                              aria-hidden="true"
+                            />
+
+                            <span
+                              className={
+                                css.reviewRatingValue
+                              }
+                            >
+                              {review.reviewer_rating.toFixed(
+                                1,
+                              )}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <p className={css.reviewText}>
-                      {review.comment}
-                    </p>
-                  </li>
-                ))}
+                      <p className={css.reviewText}>
+                        {review.comment}
+                      </p>
+                    </li>
+                  ),
+                )}
               </ul>
             )}
           </div>
@@ -187,19 +319,25 @@ const TeacherCard = ({ teacher }: TeacherCardProps) => {
 
         <ul
           className={`${css.levels} ${
-            isExpanded ? css.expandedLevels : ""
+            isExpanded
+              ? css.expandedLevels
+              : ""
           }`}
         >
-          {teacher.levels.map((level, index) => (
-            <li
-              key={level}
-              className={`${css.level} ${
-                index === 0 ? css.activeLevel : ""
-              }`}
-            >
-              #{level}
-            </li>
-          ))}
+          {teacher.levels.map(
+            (level, index) => (
+              <li
+                key={level}
+                className={`${css.level} ${
+                  index === 0
+                    ? css.activeLevel
+                    : ""
+                }`}
+              >
+                #{level}
+              </li>
+            ),
+          )}
         </ul>
 
         {isExpanded && (

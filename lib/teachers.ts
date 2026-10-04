@@ -79,3 +79,36 @@ export const getTeachersPage = async (
     hasMore,
   };
 };
+
+export const getTeachersByIds = async (
+  ids: string[],
+): Promise<Teacher[]> => {
+  if (ids.length === 0) {
+    return [];
+  }
+
+  const teachers = await Promise.all(
+    ids.map(async (id) => {
+      const teacherRef = ref(
+        database,
+        `teachers/${id}`,
+      );
+
+      const snapshot = await get(teacherRef);
+
+      if (!snapshot.exists()) {
+        return null;
+      }
+
+      return {
+        ...snapshot.val(),
+        id,
+      } as Teacher;
+    }),
+  );
+
+  return teachers.filter(
+    (teacher): teacher is Teacher =>
+      teacher !== null,
+  );
+};

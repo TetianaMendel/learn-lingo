@@ -2,6 +2,7 @@
 
 import { onAuthStateChanged } from "firebase/auth";
 import { useEffect } from "react";
+import { Toaster } from "react-hot-toast";
 
 import { auth } from "@/lib/firebase";
 import { useAuthStore } from "@/lib/store/authStore";
@@ -11,9 +12,16 @@ type Props = {
 };
 
 const AuthProvider = ({ children }: Props) => {
-  const setUser = useAuthStore((state) => state.setUser);
+  const setUser = useAuthStore(
+    (state) => state.setUser,
+  );
+
   const clearIsAuthenticated = useAuthStore(
     (state) => state.clearIsAuthenticated,
+  );
+
+  const setAuthInitialized = useAuthStore(
+    (state) => state.setAuthInitialized,
   );
 
   useEffect(() => {
@@ -24,18 +32,36 @@ const AuthProvider = ({ children }: Props) => {
           setUser({
             uid: firebaseUser.uid,
             email: firebaseUser.email ?? "",
-            username: firebaseUser.displayName ?? "",
+            username:
+              firebaseUser.displayName ?? "",
           });
         } else {
           clearIsAuthenticated();
         }
+
+        setAuthInitialized(true);
       },
     );
 
     return unsubscribe;
-  }, [setUser, clearIsAuthenticated]);
+  }, [
+    setUser,
+    clearIsAuthenticated,
+    setAuthInitialized,
+  ]);
 
-  return children;
+  return (
+    <>
+      {children}
+
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+        }}
+      />
+    </>
+  );
 };
 
 export default AuthProvider;
