@@ -189,3 +189,31 @@
         padding: 14px 39px;
     }
 }
+
+.userName {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.25;
+    color: #121417;
+}
+
+.logoutButton {
+    padding: 14px 39px;
+
+    border: none;
+    border-radius: 12px;
+
+    background-color: #121417;
+    color: #ffffff;
+
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.25;
+
+    cursor: pointer;
+}
+
+.logoutButton:hover,
+.logoutButton:focus {
+    opacity: 0.85;
+}

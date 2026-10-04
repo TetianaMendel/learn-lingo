@@ -1,0 +1,68 @@
+.backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background-color: rgba(18, 20, 23, 0.4);
+}
+
+.modal {
+    position: relative;
+
+    width: 100%;
+    max-width: 566px;
+    max-height: calc(100vh - 40px);
+
+    padding: 40px 20px;
+
+    overflow-y: auto;
+
+    border-radius: 20px;
+
+    background-color: #ffffff;
+}
+
+.closeButton {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 32px;
+    height: 32px;
+    padding: 0;
+
+    border: none;
+
+    color: #121417;
+    background-color: transparent;
+
+    cursor: pointer;
+}
+
+.closeButton svg {
+    width: 32px;
+    height: 32px;
+}
+
+@media screen and (min-width: 768px) {
+    .modal {
+        padding: 64px;
+
+        border-radius: 30px;
+    }
+
+    .closeButton {
+        top: 20px;
+        right: 20px;
+    }
+}
