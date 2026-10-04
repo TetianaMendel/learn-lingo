@@ -9,19 +9,33 @@ import css from "./TeachersList.module.css";
 
 const TeachersList = () => {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
+
   const [language, setLanguage] = useState("");
   const [level, setLevel] = useState("");
   const [price, setPrice] = useState("");
+
   const [lastKey, setLastKey] = useState<string | null>(
     null,
   );
+
   const [hasMore, setHasMore] = useState(true);
+
   const [isLoading, setIsLoading] = useState(true);
+
   const [isLoadingMore, setIsLoadingMore] =
     useState(false);
+
+  const [isLoadingFilters, setIsLoadingFilters] =
+    useState(false);
+
   const [error, setError] = useState<string | null>(
     null,
   );
+
+  const hasActiveFilters =
+    language !== "" ||
+    level !== "" ||
+    price !== "";
 
   useEffect(() => {
     const loadInitialTeachers = async () => {
@@ -52,18 +66,100 @@ const TeachersList = () => {
     void loadInitialTeachers();
   }, []);
 
+  useEffect(() => {
+    if (
+      !hasActiveFilters ||
+      !hasMore ||
+      isLoading
+    ) {
+      return;
+    }
+
+    const loadAllTeachersForFilters =
+      async () => {
+        try {
+          setIsLoadingFilters(true);
+          setError(null);
+
+          let currentLastKey: string | null =
+            lastKey;
+
+          let moreAvailable: boolean = hasMore;
+
+          const allTeachers = [...teachers];
+
+          while (
+            moreAvailable &&
+            currentLastKey
+          ) {
+            const {
+              teachers: nextTeachers,
+              lastKey: newLastKey,
+              hasMore: nextHasMore,
+            } = await getTeachersPage(
+              currentLastKey,
+            );
+
+            const existingIds = new Set(
+              allTeachers.map(
+                (teacher) => teacher.id,
+              ),
+            );
+
+            nextTeachers.forEach(
+              (teacher) => {
+                if (
+                  !existingIds.has(teacher.id)
+                ) {
+                  allTeachers.push(teacher);
+                  existingIds.add(
+                    teacher.id,
+                  );
+                }
+              },
+            );
+
+            currentLastKey = newLastKey;
+            moreAvailable = nextHasMore;
+          }
+
+          setTeachers(allTeachers);
+          setLastKey(currentLastKey);
+          setHasMore(moreAvailable);
+        } catch (error) {
+          console.error(error);
+
+          setError(
+            "Unable to load teachers for filtering.",
+          );
+        } finally {
+          setIsLoadingFilters(false);
+        }
+      };
+
+    void loadAllTeachersForFilters();
+  }, [
+    hasActiveFilters,
+    hasMore,
+    isLoading,
+    lastKey,
+    teachers,
+  ]);
+
   const filteredTeachers = useMemo(() => {
     return teachers.filter((teacher) => {
       const matchesLanguage =
-        !language ||
+        language === "" ||
         teacher.languages.includes(language);
 
       const matchesLevel =
-        !level || teacher.levels.includes(level);
+        level === "" ||
+        teacher.levels.includes(level);
 
       const matchesPrice =
-        !price ||
-        teacher.price_per_hour <= Number(price);
+        price === "" ||
+        teacher.price_per_hour ===
+          Number(price);
 
       return (
         matchesLanguage &&
@@ -71,22 +167,20 @@ const TeachersList = () => {
         matchesPrice
       );
     });
-  }, [teachers, language, level, price]);
-
-  const handleLanguageChange = (value: string) => {
-    setLanguage(value);
-  };
-
-  const handleLevelChange = (value: string) => {
-    setLevel(value);
-  };
-
-  const handlePriceChange = (value: string) => {
-    setPrice(value);
-  };
+  }, [
+    teachers,
+    language,
+    level,
+    price,
+  ]);
 
   const handleLoadMore = async () => {
-    if (!lastKey || !hasMore || isLoadingMore) {
+    if (
+      !lastKey ||
+      !hasMore ||
+      isLoadingMore ||
+      hasActiveFilters
+    ) {
       return;
     }
 
@@ -140,7 +234,10 @@ const TeachersList = () => {
     );
   }
 
-  if (error && teachers.length === 0) {
+  if (
+    error &&
+    teachers.length === 0
+  ) {
     return (
       <p className={css.error}>
         {error}
@@ -154,62 +251,60 @@ const TeachersList = () => {
         language={language}
         level={level}
         price={price}
-        onLanguageChange={handleLanguageChange}
-        onLevelChange={handleLevelChange}
-        onPriceChange={handlePriceChange}
+        onLanguageChange={setLanguage}
+        onLevelChange={setLevel}
+        onPriceChange={setPrice}
       />
 
-      {filteredTeachers.length > 0 ? (
-        <>
-          <div className={css.list}>
-            {filteredTeachers.map((teacher) => (
-              <TeacherCard
-                key={teacher.id}
-                teacher={teacher}
-              />
-            ))}
-          </div>
-
-          {error && (
-            <p className={css.error}>
-              {error}
-            </p>
-          )}
-
-          {hasMore && (
-            <button
-              type="button"
-              className={css.loadMore}
-              onClick={handleLoadMore}
-              disabled={isLoadingMore}
-            >
-              {isLoadingMore
-                ? "Loading..."
-                : "Load more"}
-            </button>
-          )}
-        </>
-      ) : (
-        <>
-          <p className={css.empty}>
-            No teachers found for the selected
-            filters.
-          </p>
-
-          {hasMore && (
-            <button
-              type="button"
-              className={css.loadMore}
-              onClick={handleLoadMore}
-              disabled={isLoadingMore}
-            >
-              {isLoadingMore
-                ? "Loading..."
-                : "Load more"}
-            </button>
-          )}
-        </>
+      {isLoadingFilters && (
+        <p className={css.status}>
+          Filtering teachers...
+        </p>
       )}
+
+      {!isLoadingFilters &&
+        filteredTeachers.length > 0 && (
+          <>
+            <div className={css.list}>
+              {filteredTeachers.map(
+                (teacher) => (
+                  <TeacherCard
+                    key={teacher.id}
+                    teacher={teacher}
+                  />
+                ),
+              )}
+            </div>
+
+            {error && (
+              <p className={css.error}>
+                {error}
+              </p>
+            )}
+
+            {!hasActiveFilters &&
+              hasMore && (
+                <button
+                  type="button"
+                  className={css.loadMore}
+                  onClick={handleLoadMore}
+                  disabled={isLoadingMore}
+                >
+                  {isLoadingMore
+                    ? "Loading..."
+                    : "Load more"}
+                </button>
+              )}
+          </>
+        )}
+
+      {!isLoadingFilters &&
+        filteredTeachers.length === 0 && (
+          <p className={css.empty}>
+            No teachers found for the
+            selected filters.
+          </p>
+        )}
     </>
   );
 };
