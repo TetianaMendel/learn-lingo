@@ -5,34 +5,28 @@
 .title {
     margin: 0 0 20px;
     padding-right: 40px;
-
     font-family: var(--font-family);
     font-weight: 500;
     font-size: 32px;
     line-height: 1.2;
     letter-spacing: -0.02em;
-
     color: #121417;
 }
 
 .description {
     width: 100%;
     max-width: 438px;
-
     margin: 0 0 32px;
-
     font-family: var(--font-family);
     font-weight: 400;
     font-size: 16px;
     line-height: 1.38;
-
     color: rgba(18, 20, 23, 0.8);
 }
 
 .form {
     display: flex;
     flex-direction: column;
-
     gap: 18px;
 }
 
@@ -43,18 +37,14 @@
 .input {
     width: 100%;
     height: 54px;
-
     padding: 16px 18px;
-
     border: 1px solid rgba(18, 20, 23, 0.1);
     border-radius: 12px;
     outline: none;
-
     font-family: var(--font-family);
     font-weight: 400;
     font-size: 16px;
     line-height: 1.38;
-
     color: #121417;
     background-color: transparent;
 }
@@ -80,22 +70,16 @@
     position: absolute;
     top: 50%;
     right: 18px;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     width: 20px;
     height: 20px;
     padding: 0;
-
     transform: translateY(-50%);
-
     border: none;
-
     color: #121417;
     background-color: transparent;
-
     cursor: pointer;
 }
 
@@ -106,35 +90,27 @@
 
 .error {
     margin: 6px 0 0;
-
     font-family: var(--font-family);
     font-weight: 400;
     font-size: 13px;
     line-height: 1.2;
-
     color: #d32f2f;
 }
 
 .submitButton {
     width: 100%;
     height: 60px;
-
     margin-top: 22px;
     padding: 16px;
-
     border: none;
     border-radius: 12px;
-
     font-family: var(--font-family);
     font-weight: 700;
     font-size: 18px;
     line-height: 1.56;
-
     color: #121417;
     background-color: #f4c550;
-
     cursor: pointer;
-
     transition: background-color 250ms ease;
 }
 
@@ -151,7 +127,6 @@
 @media screen and (min-width: 768px) {
     .title {
         padding-right: 0;
-
         font-size: 40px;
     }
 

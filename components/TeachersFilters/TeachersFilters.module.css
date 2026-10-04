@@ -1,18 +1,14 @@
 .filters {
     width: 100%;
-
     margin-bottom: 32px;
-
     display: flex;
     flex-direction: column;
-
     gap: 16px;
 }
 
 .filterGroup {
     display: flex;
     flex-direction: column;
-
     gap: 8px;
 }
 
@@ -21,16 +17,13 @@
     font-weight: 500;
     font-size: 14px;
     line-height: 1.29;
-
     color: #8a8a89;
 }
 
 .selectWrapper {
     position: relative;
-
     width: 100%;
     height: 48px;
-
     background-color: #ffffff;
     border-radius: 14px;
 }
@@ -38,50 +31,37 @@
 .select {
     width: 100%;
     height: 100%;
-
     padding: 0 48px 0 18px;
-
     border: none;
     border-radius: 14px;
     outline: none;
-
     appearance: none;
     -webkit-appearance: none;
-
     font-family: var(--font-family);
     font-weight: 500;
     font-size: 18px;
     line-height: 1.11;
-
     color: #121417;
     background-color: transparent;
-
     cursor: pointer;
 }
 
 .selectIcon {
     position: absolute;
-
     top: 50%;
     right: 14px;
-
     width: 20px;
     height: 20px;
-
     transform: translateY(-50%);
-
     color: #121417;
-
     pointer-events: none;
 }
 
 @media screen and (min-width: 768px) {
     .filters {
         width: 583px;
-
         flex-direction: row;
         align-items: flex-end;
-
         gap: 20px;
     }
 
@@ -101,7 +81,6 @@
 @media screen and (min-width: 1440px) {
     .filters {
         height: 74px;
-
         margin-bottom: 32px;
     }
 }

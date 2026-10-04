@@ -4,13 +4,11 @@ import { signOut } from "firebase/auth";
 import Link from "next/link";
 import { useState } from "react";
 import { FiLogIn } from "react-icons/fi";
-
 import LoginForm from "@/components/LoginForm/LoginForm";
 import Modal from "@/components/Modal/Modal";
 import RegistrationForm from "@/components/RegistrationForm/RegistrationForm";
 import { auth } from "@/lib/firebase";
 import { useAuthStore } from "@/lib/store/authStore";
-
 import styles from "./Header.module.css";
 
 type AuthModal = "login" | "register" | null;

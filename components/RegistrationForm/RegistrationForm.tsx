@@ -9,10 +9,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import * as yup from "yup";
-
 import { auth } from "@/lib/firebase";
 import { useAuthStore } from "@/lib/store/authStore";
-
 import css from "./RegistrationForm.module.css";
 
 const schema = yup.object({

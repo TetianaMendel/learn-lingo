@@ -1,7 +1,6 @@
 "use client";
 
 import { FiChevronDown } from "react-icons/fi";
-
 import css from "./TeachersFilters.module.css";
 
 type TeachersFiltersProps = {

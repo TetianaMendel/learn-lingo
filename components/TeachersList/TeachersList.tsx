@@ -1,32 +1,24 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-
 import TeacherCard from "@/components/TeacherCard/TeacherCard";
 import TeachersFilters from "@/components/TeachersFilters/TeachersFilters";
 import { getTeachersPage } from "@/lib/teachers";
 import type { Teacher } from "@/types/teacher";
-
 import css from "./TeachersList.module.css";
 
 const TeachersList = () => {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
-
   const [language, setLanguage] = useState("");
   const [level, setLevel] = useState("");
   const [price, setPrice] = useState("");
-
   const [lastKey, setLastKey] = useState<string | null>(
     null,
   );
-
   const [hasMore, setHasMore] = useState(true);
-
   const [isLoading, setIsLoading] = useState(true);
-
   const [isLoadingMore, setIsLoadingMore] =
     useState(false);
-
   const [error, setError] = useState<string | null>(
     null,
   );

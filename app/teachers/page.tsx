@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-
 import TeachersList from "@/components/TeachersList/TeachersList";
-
 import css from "./page.module.css";
 
 export async function generateMetadata(): Promise<Metadata> {

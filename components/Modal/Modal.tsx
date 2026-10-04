@@ -3,15 +3,19 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { FiX } from "react-icons/fi";
-
 import css from "./Modal.module.css";
 
 interface ModalProps {
   children: React.ReactNode;
   onClose: () => void;
+  variant?: "auth" | "trial";
 }
 
-const Modal = ({ children, onClose }: ModalProps) => {
+const Modal = ({
+  children,
+  onClose,
+  variant = "auth",
+}: ModalProps) => {
   useEffect(() => {
     document.body.style.overflow = "hidden";
 
@@ -44,7 +48,11 @@ const Modal = ({ children, onClose }: ModalProps) => {
       aria-modal="true"
       onClick={handleBackdropClick}
     >
-      <div className={css.modal}>
+      <div
+        className={`${css.modal} ${
+          variant === "trial" ? css.trialModal : ""
+        }`}
+      >
         <button
           type="button"
           className={css.closeButton}

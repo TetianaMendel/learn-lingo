@@ -2,13 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
 import TeacherCard from "@/components/TeacherCard/TeacherCard";
 import { getFavoriteIds } from "@/lib/favorites";
 import { getTeachersByIds } from "@/lib/teachers";
 import { useAuthStore } from "@/lib/store/authStore";
 import type { Teacher } from "@/types/teacher";
-
 import css from "./page.module.css";
 
 const FavoritesPage = () => {

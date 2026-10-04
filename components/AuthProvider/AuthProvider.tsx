@@ -3,7 +3,6 @@
 import { onAuthStateChanged } from "firebase/auth";
 import { useEffect } from "react";
 import { Toaster } from "react-hot-toast";
-
 import { auth } from "@/lib/firebase";
 import { useAuthStore } from "@/lib/store/authStore";
 
