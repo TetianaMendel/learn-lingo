@@ -1,11 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+
 import TeacherCard from "@/components/TeacherCard/TeacherCard";
 import TeachersFilters from "@/components/TeachersFilters/TeachersFilters";
 import { getTeachersPage } from "@/lib/teachers";
 import type { Teacher } from "@/types/teacher";
+
 import css from "./TeachersList.module.css";
+
+const PAGE_SIZE = 4;
 
 const TeachersList = () => {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
@@ -19,6 +23,9 @@ const TeachersList = () => {
   );
 
   const [hasMore, setHasMore] = useState(true);
+
+  const [visibleCount, setVisibleCount] =
+    useState(PAGE_SIZE);
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -84,7 +91,8 @@ const TeachersList = () => {
           let currentLastKey: string | null =
             lastKey;
 
-          let moreAvailable: boolean = hasMore;
+          let moreAvailable: boolean =
+            hasMore;
 
           const allTeachers = [...teachers];
 
@@ -112,6 +120,7 @@ const TeachersList = () => {
                   !existingIds.has(teacher.id)
                 ) {
                   allTeachers.push(teacher);
+
                   existingIds.add(
                     teacher.id,
                   );
@@ -174,13 +183,55 @@ const TeachersList = () => {
     price,
   ]);
 
+  const visibleTeachers = useMemo(() => {
+    return filteredTeachers.slice(
+      0,
+      visibleCount,
+    );
+  }, [
+    filteredTeachers,
+    visibleCount,
+  ]);
+
+  const hasMoreVisibleTeachers =
+    filteredTeachers.length > visibleCount;
+
+  const handleLanguageChange = (
+    value: string,
+  ) => {
+    setLanguage(value);
+    setVisibleCount(PAGE_SIZE);
+  };
+
+  const handleLevelChange = (
+    value: string,
+  ) => {
+    setLevel(value);
+    setVisibleCount(PAGE_SIZE);
+  };
+
+  const handlePriceChange = (
+    value: string,
+  ) => {
+    setPrice(value);
+    setVisibleCount(PAGE_SIZE);
+  };
+
   const handleLoadMore = async () => {
-    if (
-      !lastKey ||
-      !hasMore ||
-      isLoadingMore ||
-      hasActiveFilters
-    ) {
+    if (isLoadingMore) {
+      return;
+    }
+
+    if (teachers.length > visibleCount) {
+      setVisibleCount(
+        (currentCount) =>
+          currentCount + PAGE_SIZE,
+      );
+
+      return;
+    }
+
+    if (!lastKey || !hasMore) {
       return;
     }
 
@@ -215,6 +266,11 @@ const TeachersList = () => {
 
       setLastKey(newLastKey);
       setHasMore(moreAvailable);
+
+      setVisibleCount(
+        (currentCount) =>
+          currentCount + PAGE_SIZE,
+      );
     } catch (error) {
       console.error(error);
 
@@ -225,6 +281,9 @@ const TeachersList = () => {
       setIsLoadingMore(false);
     }
   };
+
+  const shouldShowLoadMore =
+    hasMoreVisibleTeachers || hasMore;
 
   if (isLoading) {
     return (
@@ -251,9 +310,15 @@ const TeachersList = () => {
         language={language}
         level={level}
         price={price}
-        onLanguageChange={setLanguage}
-        onLevelChange={setLevel}
-        onPriceChange={setPrice}
+        onLanguageChange={
+          handleLanguageChange
+        }
+        onLevelChange={
+          handleLevelChange
+        }
+        onPriceChange={
+          handlePriceChange
+        }
       />
 
       {isLoadingFilters && (
@@ -263,10 +328,10 @@ const TeachersList = () => {
       )}
 
       {!isLoadingFilters &&
-        filteredTeachers.length > 0 && (
+        visibleTeachers.length > 0 && (
           <>
             <div className={css.list}>
-              {filteredTeachers.map(
+              {visibleTeachers.map(
                 (teacher) => (
                   <TeacherCard
                     key={teacher.id}
@@ -282,24 +347,23 @@ const TeachersList = () => {
               </p>
             )}
 
-            {!hasActiveFilters &&
-              hasMore && (
-                <button
-                  type="button"
-                  className={css.loadMore}
-                  onClick={handleLoadMore}
-                  disabled={isLoadingMore}
-                >
-                  {isLoadingMore
-                    ? "Loading..."
-                    : "Load more"}
-                </button>
-              )}
+            {shouldShowLoadMore && (
+              <button
+                type="button"
+                className={css.loadMore}
+                onClick={handleLoadMore}
+                disabled={isLoadingMore}
+              >
+                {isLoadingMore
+                  ? "Loading..."
+                  : "Load more"}
+              </button>
+            )}
           </>
         )}
 
       {!isLoadingFilters &&
-        filteredTeachers.length === 0 && (
+        visibleTeachers.length === 0 && (
           <p className={css.empty}>
             No teachers found for the
             selected filters.

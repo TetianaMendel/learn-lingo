@@ -58,6 +58,7 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+    flex-shrink: 0;
 }
 
 .caption {
@@ -79,7 +80,8 @@
 
 .rightBlock {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    min-width: 0;
 }
 
 .meta {
@@ -87,6 +89,7 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 16px;
+    min-width: 0;
     font-family: var(--font-family);
     font-weight: 500;
     font-size: 16px;
@@ -129,7 +132,7 @@
 .favoriteButton {
     width: 26px;
     height: 26px;
-    margin-left: 24px;
+    margin-left: 0;
     padding: 0;
     flex-shrink: 0;
     display: inline-flex;
@@ -372,36 +375,25 @@
     background-color: #ffdc86;
 }
 
+/* TABLET */
+
 @media screen and (min-width: 768px) {
     .card {
         flex-direction: row;
-
         gap: 32px;
     }
 
-    .divider {
-        display: block;
-    }
-}
-
-@media screen and (min-width: 1440px) {
-    .card {
-        width: 1184px;
-        min-height: 328px;
-        padding: 24px;
-        gap: 48px;
-    }
-
     .content {
-        width: 968px;
-        min-width: 968px;
+        flex: 1;
+        width: auto;
+        min-width: 0;
     }
 
     .header {
         flex-direction: row;
         align-items: flex-start;
         justify-content: space-between;
-        gap: 0;
+        gap: 24px;
     }
 
     .nameBlock {
@@ -409,22 +401,67 @@
     }
 
     .rightBlock {
+        width: min(697px, 100%);
+        min-width: 0;
+        justify-content: space-between;
+        gap: 32px;
+        flex-shrink: 1;
+    }
+
+    .meta {
+        width: min(607px, 100%);
+        min-width: 0;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .divider {
+        display: block;
+    }
+
+    .favoriteButton {
+        margin-left: 0;
+    }
+}
+
+/* DESKTOP */
+
+@media screen and (min-width: 1440px) {
+    .card {
+        width: 100%;
+        max-width: 1184px;
+        min-height: 328px;
+        gap: 48px;
+    }
+
+    .content {
+        width: 968px;
+        max-width: 968px;
+        flex: 0 0 968px;
+    }
+
+    .header {
+        gap: 0;
+    }
+
+    .rightBlock {
         width: 697px;
         height: 26px;
-        flex-shrink: 0;
+        flex: 0 0 697px;
+        justify-content: flex-start;
         gap: 64px;
     }
 
     .meta {
         width: 607px;
         height: 24px;
+        flex: 0 0 607px;
         flex-wrap: nowrap;
-        gap: 16px;
     }
 
     .favoriteButton {
         width: 26px;
         height: 26px;
-        margin-left: 0;
+        flex: 0 0 26px;
     }
 }
