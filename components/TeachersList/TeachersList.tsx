@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import Loader from "@/components/Loader/Loader";
 import TeacherCard from "@/components/TeacherCard/TeacherCard";
 import TeachersFilters from "@/components/TeachersFilters/TeachersFilters";
 import { getTeachersPage } from "@/lib/teachers";
@@ -82,69 +83,61 @@ const TeachersList = () => {
       return;
     }
 
-    const loadAllTeachersForFilters =
-      async () => {
-        try {
-          setIsLoadingFilters(true);
-          setError(null);
+    const loadAllTeachersForFilters = async () => {
+      try {
+        setIsLoadingFilters(true);
+        setError(null);
 
-          let currentLastKey: string | null =
-            lastKey;
+        let currentLastKey: string | null =
+          lastKey;
 
-          let moreAvailable: boolean =
-            hasMore;
+        let moreAvailable: boolean =
+          hasMore;
 
-          const allTeachers = [...teachers];
+        const allTeachers = [...teachers];
 
-          while (
-            moreAvailable &&
-            currentLastKey
-          ) {
-            const {
-              teachers: nextTeachers,
-              lastKey: newLastKey,
-              hasMore: nextHasMore,
-            } = await getTeachersPage(
-              currentLastKey,
-            );
-
-            const existingIds = new Set(
-              allTeachers.map(
-                (teacher) => teacher.id,
-              ),
-            );
-
-            nextTeachers.forEach(
-              (teacher) => {
-                if (
-                  !existingIds.has(teacher.id)
-                ) {
-                  allTeachers.push(teacher);
-
-                  existingIds.add(
-                    teacher.id,
-                  );
-                }
-              },
-            );
-
-            currentLastKey = newLastKey;
-            moreAvailable = nextHasMore;
-          }
-
-          setTeachers(allTeachers);
-          setLastKey(currentLastKey);
-          setHasMore(moreAvailable);
-        } catch (error) {
-          console.error(error);
-
-          setError(
-            "Unable to load teachers for filtering.",
+        while (
+          moreAvailable &&
+          currentLastKey
+        ) {
+          const {
+            teachers: nextTeachers,
+            lastKey: newLastKey,
+            hasMore: nextHasMore,
+          } = await getTeachersPage(
+            currentLastKey,
           );
-        } finally {
-          setIsLoadingFilters(false);
+
+          const existingIds = new Set(
+            allTeachers.map(
+              (teacher) => teacher.id,
+            ),
+          );
+
+          nextTeachers.forEach((teacher) => {
+            if (!existingIds.has(teacher.id)) {
+              allTeachers.push(teacher);
+              existingIds.add(teacher.id);
+            }
+          });
+
+          currentLastKey = newLastKey;
+          moreAvailable = nextHasMore;
         }
-      };
+
+        setTeachers(allTeachers);
+        setLastKey(currentLastKey);
+        setHasMore(moreAvailable);
+      } catch (error) {
+        console.error(error);
+
+        setError(
+          "Unable to load teachers for filtering.",
+        );
+      } finally {
+        setIsLoadingFilters(false);
+      }
+    };
 
     void loadAllTeachersForFilters();
   }, [
@@ -167,8 +160,7 @@ const TeachersList = () => {
 
       const matchesPrice =
         price === "" ||
-        teacher.price_per_hour ===
-          Number(price);
+        teacher.price_per_hour === Number(price);
 
       return (
         matchesLanguage &&
@@ -176,43 +168,29 @@ const TeachersList = () => {
         matchesPrice
       );
     });
-  }, [
-    teachers,
-    language,
-    level,
-    price,
-  ]);
+  }, [teachers, language, level, price]);
 
   const visibleTeachers = useMemo(() => {
     return filteredTeachers.slice(
       0,
       visibleCount,
     );
-  }, [
-    filteredTeachers,
-    visibleCount,
-  ]);
+  }, [filteredTeachers, visibleCount]);
 
   const hasMoreVisibleTeachers =
     filteredTeachers.length > visibleCount;
 
-  const handleLanguageChange = (
-    value: string,
-  ) => {
+  const handleLanguageChange = (value: string) => {
     setLanguage(value);
     setVisibleCount(PAGE_SIZE);
   };
 
-  const handleLevelChange = (
-    value: string,
-  ) => {
+  const handleLevelChange = (value: string) => {
     setLevel(value);
     setVisibleCount(PAGE_SIZE);
   };
 
-  const handlePriceChange = (
-    value: string,
-  ) => {
+  const handlePriceChange = (value: string) => {
     setPrice(value);
     setVisibleCount(PAGE_SIZE);
   };
@@ -224,8 +202,7 @@ const TeachersList = () => {
 
     if (teachers.length > visibleCount) {
       setVisibleCount(
-        (currentCount) =>
-          currentCount + PAGE_SIZE,
+        (currentCount) => currentCount + PAGE_SIZE,
       );
 
       return;
@@ -287,16 +264,13 @@ const TeachersList = () => {
 
   if (isLoading) {
     return (
-      <p className={css.status}>
-        Loading teachers...
-      </p>
+      <div className={css.loadingWrapper}>
+        <Loader text="Loading teachers..." />
+      </div>
     );
   }
 
-  if (
-    error &&
-    teachers.length === 0
-  ) {
+  if (error && teachers.length === 0) {
     return (
       <p className={css.error}>
         {error}
@@ -310,35 +284,27 @@ const TeachersList = () => {
         language={language}
         level={level}
         price={price}
-        onLanguageChange={
-          handleLanguageChange
-        }
-        onLevelChange={
-          handleLevelChange
-        }
-        onPriceChange={
-          handlePriceChange
-        }
+        onLanguageChange={handleLanguageChange}
+        onLevelChange={handleLevelChange}
+        onPriceChange={handlePriceChange}
       />
 
       {isLoadingFilters && (
-        <p className={css.status}>
-          Filtering teachers...
-        </p>
+        <div className={css.loadingWrapper}>
+          <Loader text="Filtering teachers..." />
+        </div>
       )}
 
       {!isLoadingFilters &&
         visibleTeachers.length > 0 && (
           <>
             <div className={css.list}>
-              {visibleTeachers.map(
-                (teacher) => (
-                  <TeacherCard
-                    key={teacher.id}
-                    teacher={teacher}
-                  />
-                ),
-              )}
+              {visibleTeachers.map((teacher) => (
+                <TeacherCard
+                  key={teacher.id}
+                  teacher={teacher}
+                />
+              ))}
             </div>
 
             {error && (
@@ -354,9 +320,11 @@ const TeachersList = () => {
                 onClick={handleLoadMore}
                 disabled={isLoadingMore}
               >
-                {isLoadingMore
-                  ? "Loading..."
-                  : "Load more"}
+                {isLoadingMore ? (
+                  <Loader size="small" />
+                ) : (
+                  "Load more"
+                )}
               </button>
             )}
           </>
@@ -365,8 +333,7 @@ const TeachersList = () => {
       {!isLoadingFilters &&
         visibleTeachers.length === 0 && (
           <p className={css.empty}>
-            No teachers found for the
-            selected filters.
+            No teachers found for the selected filters.
           </p>
         )}
     </>
