@@ -1,151 +1,88 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-
+import { useInfiniteQuery } from "@tanstack/react-query";
 import Loader from "@/components/Loader/Loader";
 import TeacherCard from "@/components/TeacherCard/TeacherCard";
 import TeachersFilters from "@/components/TeachersFilters/TeachersFilters";
 import { getTeachersPage } from "@/lib/teachers";
-import type { Teacher } from "@/types/teacher";
-
 import css from "./TeachersList.module.css";
 
 const PAGE_SIZE = 4;
 
 const TeachersList = () => {
-  const [teachers, setTeachers] = useState<Teacher[]>([]);
-
   const [language, setLanguage] = useState("");
   const [level, setLevel] = useState("");
   const [price, setPrice] = useState("");
-
-  const [lastKey, setLastKey] = useState<string | null>(
-    null,
-  );
-
-  const [hasMore, setHasMore] = useState(true);
-
-  const [visibleCount, setVisibleCount] =
-    useState(PAGE_SIZE);
-
-  const [isLoading, setIsLoading] = useState(true);
-
-  const [isLoadingMore, setIsLoadingMore] =
-    useState(false);
-
-  const [isLoadingFilters, setIsLoadingFilters] =
-    useState(false);
-
-  const [error, setError] = useState<string | null>(
-    null,
-  );
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [filterError, setFilterError] = useState(false);
 
   const hasActiveFilters =
-    language !== "" ||
-    level !== "" ||
-    price !== "";
+    language !== "" || level !== "" || price !== "";
 
-  useEffect(() => {
-    const loadInitialTeachers = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
+  const {
+    data,
+    isPending,
+    isError,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["teachers"],
+    queryFn: ({ pageParam }) => getTeachersPage(pageParam),
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) =>
+      lastPage.hasMore && lastPage.lastKey
+        ? lastPage.lastKey
+        : undefined,
+    retry: false,
+  });
 
-        const {
-          teachers: firstTeachers,
-          lastKey: newLastKey,
-          hasMore: moreAvailable,
-        } = await getTeachersPage();
+  const teachers = useMemo(() => {
+    const allTeachers =
+      data?.pages.flatMap((page) => page.teachers) ?? [];
 
-        setTeachers(firstTeachers);
-        setLastKey(newLastKey);
-        setHasMore(moreAvailable);
-      } catch (error) {
-        console.error(error);
-
-        setError(
-          "Unable to load teachers. Please try again.",
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    void loadInitialTeachers();
-  }, []);
+    return Array.from(
+      new Map(
+        allTeachers.map((teacher) => [teacher.id, teacher]),
+      ).values(),
+    );
+  }, [data]);
 
   useEffect(() => {
     if (
       !hasActiveFilters ||
-      !hasMore ||
-      isLoading
+      !hasNextPage ||
+      isPending ||
+      isFetchingNextPage ||
+      filterError
     ) {
       return;
     }
 
-    const loadAllTeachersForFilters = async () => {
-      try {
-        setIsLoadingFilters(true);
-        setError(null);
+    let cancelled = false;
 
-        let currentLastKey: string | null =
-          lastKey;
+    const loadNextPage = async () => {
+      const result = await fetchNextPage();
 
-        let moreAvailable: boolean =
-          hasMore;
-
-        const allTeachers = [...teachers];
-
-        while (
-          moreAvailable &&
-          currentLastKey
-        ) {
-          const {
-            teachers: nextTeachers,
-            lastKey: newLastKey,
-            hasMore: nextHasMore,
-          } = await getTeachersPage(
-            currentLastKey,
-          );
-
-          const existingIds = new Set(
-            allTeachers.map(
-              (teacher) => teacher.id,
-            ),
-          );
-
-          nextTeachers.forEach((teacher) => {
-            if (!existingIds.has(teacher.id)) {
-              allTeachers.push(teacher);
-              existingIds.add(teacher.id);
-            }
-          });
-
-          currentLastKey = newLastKey;
-          moreAvailable = nextHasMore;
-        }
-
-        setTeachers(allTeachers);
-        setLastKey(currentLastKey);
-        setHasMore(moreAvailable);
-      } catch (error) {
-        console.error(error);
-
-        setError(
-          "Unable to load teachers for filtering.",
-        );
-      } finally {
-        setIsLoadingFilters(false);
+      if (!cancelled && result.isError) {
+        setFilterError(true);
       }
     };
 
-    void loadAllTeachersForFilters();
+    void loadNextPage();
+
+    return () => {
+      cancelled = true;
+    };
   }, [
     hasActiveFilters,
-    hasMore,
-    isLoading,
-    lastKey,
-    teachers,
+    hasNextPage,
+    isPending,
+    isFetchingNextPage,
+    filterError,
+    fetchNextPage,
   ]);
 
   const filteredTeachers = useMemo(() => {
@@ -170,99 +107,56 @@ const TeachersList = () => {
     });
   }, [teachers, language, level, price]);
 
-  const visibleTeachers = useMemo(() => {
-    return filteredTeachers.slice(
-      0,
-      visibleCount,
-    );
-  }, [filteredTeachers, visibleCount]);
+  const visibleTeachers = useMemo(
+    () => filteredTeachers.slice(0, visibleCount),
+    [filteredTeachers, visibleCount],
+  );
 
-  const hasMoreVisibleTeachers =
-    filteredTeachers.length > visibleCount;
+  const isLoadingFilters =
+    hasActiveFilters &&
+    hasNextPage &&
+    !filterError;
 
   const handleLanguageChange = (value: string) => {
     setLanguage(value);
     setVisibleCount(PAGE_SIZE);
+    setFilterError(false);
   };
 
   const handleLevelChange = (value: string) => {
     setLevel(value);
     setVisibleCount(PAGE_SIZE);
+    setFilterError(false);
   };
 
   const handlePriceChange = (value: string) => {
     setPrice(value);
     setVisibleCount(PAGE_SIZE);
+    setFilterError(false);
   };
 
   const handleLoadMore = async () => {
-    if (isLoadingMore) {
+    if (isFetchingNextPage) return;
+
+    if (filteredTeachers.length > visibleCount) {
+      setVisibleCount((count) => count + PAGE_SIZE);
       return;
     }
 
-    if (teachers.length > visibleCount) {
-      setVisibleCount(
-        (currentCount) => currentCount + PAGE_SIZE,
-      );
+    if (!hasNextPage) return;
 
-      return;
-    }
+    const result = await fetchNextPage();
 
-    if (!lastKey || !hasMore) {
-      return;
-    }
-
-    try {
-      setIsLoadingMore(true);
-      setError(null);
-
-      const {
-        teachers: nextTeachers,
-        lastKey: newLastKey,
-        hasMore: moreAvailable,
-      } = await getTeachersPage(lastKey);
-
-      setTeachers((currentTeachers) => {
-        const existingIds = new Set(
-          currentTeachers.map(
-            (teacher) => teacher.id,
-          ),
-        );
-
-        const uniqueNewTeachers =
-          nextTeachers.filter(
-            (teacher) =>
-              !existingIds.has(teacher.id),
-          );
-
-        return [
-          ...currentTeachers,
-          ...uniqueNewTeachers,
-        ];
-      });
-
-      setLastKey(newLastKey);
-      setHasMore(moreAvailable);
-
-      setVisibleCount(
-        (currentCount) =>
-          currentCount + PAGE_SIZE,
-      );
-    } catch (error) {
-      console.error(error);
-
-      setError(
-        "Unable to load more teachers. Please try again.",
-      );
-    } finally {
-      setIsLoadingMore(false);
+    if (!result.isError) {
+      setVisibleCount((count) => count + PAGE_SIZE);
     }
   };
 
   const shouldShowLoadMore =
-    hasMoreVisibleTeachers || hasMore;
+    filteredTeachers.length > visibleCount ||
+    (!hasActiveFilters && hasNextPage);
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <div className={css.loadingWrapper}>
         <Loader text="Loading teachers..." />
@@ -270,10 +164,10 @@ const TeachersList = () => {
     );
   }
 
-  if (error && teachers.length === 0) {
+  if (isError && teachers.length === 0) {
     return (
       <p className={css.error}>
-        {error}
+        Unable to load teachers. Please try again.
       </p>
     );
   }
@@ -295,47 +189,46 @@ const TeachersList = () => {
         </div>
       )}
 
-      {!isLoadingFilters &&
-        visibleTeachers.length > 0 && (
-          <>
-            <div className={css.list}>
-              {visibleTeachers.map((teacher) => (
-                <TeacherCard
-                  key={teacher.id}
-                  teacher={teacher}
-                />
-              ))}
-            </div>
+      {!isLoadingFilters && visibleTeachers.length > 0 && (
+        <>
+          <div className={css.list}>
+            {visibleTeachers.map((teacher) => (
+              <TeacherCard
+                key={teacher.id}
+                teacher={teacher}
+              />
+            ))}
+          </div>
 
-            {error && (
-              <p className={css.error}>
-                {error}
-              </p>
-            )}
+          {(isError || filterError) && (
+            <p className={css.error}>
+              {error?.message ||
+                "Unable to load teachers. Please try again."}
+            </p>
+          )}
 
-            {shouldShowLoadMore && (
-              <button
-                type="button"
-                className={css.loadMore}
-                onClick={handleLoadMore}
-                disabled={isLoadingMore}
-              >
-                {isLoadingMore ? (
-                  <Loader size="small" />
-                ) : (
-                  "Load more"
-                )}
-              </button>
-            )}
-          </>
-        )}
+          {shouldShowLoadMore && (
+            <button
+              type="button"
+              className={css.loadMore}
+              onClick={handleLoadMore}
+              disabled={isFetchingNextPage}
+            >
+              {isFetchingNextPage ? (
+                <Loader size="small" />
+              ) : (
+                "Load more"
+              )}
+            </button>
+          )}
+        </>
+      )}
 
-      {!isLoadingFilters &&
-        visibleTeachers.length === 0 && (
-          <p className={css.empty}>
-            No teachers found for the selected filters.
-          </p>
-        )}
+      {!isLoadingFilters && visibleTeachers.length === 0 && (
+        <p className={css.empty}>
+          No teachers found for the selected filters.
+        </p>
+      )}
     </>
   );
 };

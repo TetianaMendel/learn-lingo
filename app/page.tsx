@@ -99,6 +99,7 @@ export default function Home() {
               width={360}
               height={176}
               className={css.mac}
+              loading="eager"
             />
           </div>
         </div>
