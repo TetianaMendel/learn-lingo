@@ -32,22 +32,18 @@ const TeacherCard = ({
   const [isTrialLessonOpen, setIsTrialLessonOpen] =
     useState(false);
 
+  const [, setFavoritesVersion] = useState(0);
+
   const isAuthenticated = useAuthStore(
     (state) => state.isAuthenticated,
   );
 
   const user = useAuthStore((state) => state.user);
 
-  const [isFavorite, setIsFavorite] = useState(() => {
-    if (!user) {
-      return false;
-    }
-
-    return isFavoriteTeacher(
-      user.uid,
-      teacher.id,
-    );
-  });
+  const isFavorite =
+    isAuthenticated && user
+      ? isFavoriteTeacher(user.uid, teacher.id)
+      : false;
 
   const fullName = `${teacher.name} ${teacher.surname}`;
 
@@ -61,32 +57,20 @@ const TeacherCard = ({
     }
 
     if (isFavorite) {
-      removeFavoriteTeacher(
-        user.uid,
-        teacher.id,
-      );
+      removeFavoriteTeacher(user.uid, teacher.id);
 
-      setIsFavorite(false);
+      setFavoritesVersion((prev) => prev + 1);
 
-      onFavoriteChange?.(
-        teacher.id,
-        false,
-      );
+      onFavoriteChange?.(teacher.id, false);
 
       return;
     }
 
-    addFavoriteTeacher(
-      user.uid,
-      teacher.id,
-    );
+    addFavoriteTeacher(user.uid, teacher.id);
 
-    setIsFavorite(true);
+    setFavoritesVersion((prev) => prev + 1);
 
-    onFavoriteChange?.(
-      teacher.id,
-      true,
-    );
+    onFavoriteChange?.(teacher.id, true);
   };
 
   const openTrialLesson = () => {
@@ -222,9 +206,7 @@ const TeacherCard = ({
                 Lesson Info:{" "}
               </span>
 
-              <span>
-                {teacher.lesson_info}
-              </span>
+              <span>{teacher.lesson_info}</span>
             </p>
 
             <p className={css.detail}>
@@ -244,9 +226,7 @@ const TeacherCard = ({
             <button
               type="button"
               className={css.readMore}
-              onClick={() =>
-                setIsExpanded(true)
-              }
+              onClick={() => setIsExpanded(true)}
               aria-expanded={false}
             >
               Read more
